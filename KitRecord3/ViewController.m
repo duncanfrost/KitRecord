@@ -20,6 +20,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+
+
+    _arSessionConfiguration = [ARWorldTrackingConfiguration new];
+    _arSessionConfiguration.worldAlignment = ARWorldAlignmentGravity;
+    _arSession = [ARSession new];
+    
+    // _arCamera = [ARCamera new];s
+
     // Set the view's delegate
     self.sceneView.delegate = self;
     

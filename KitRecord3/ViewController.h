@@ -12,4 +12,6 @@
 
 @interface ViewController : UIViewController
 
+@property (nonatomic, strong) ARWorldTrackingConfiguration *arSessionConfiguration;
+@property (nonatomic, strong) ARSession *arSession;
 @end
