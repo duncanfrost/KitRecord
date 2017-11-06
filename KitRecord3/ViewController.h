@@ -14,4 +14,6 @@
 
 @property (nonatomic, strong) ARWorldTrackingConfiguration *arSessionConfiguration;
 @property (nonatomic, strong) ARSession *arSession;
+@property (weak, nonatomic) IBOutlet UITextField *tbOut;
+
 @end

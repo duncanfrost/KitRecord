@@ -14,27 +14,55 @@
 
 @end
 
-    
+
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-
-
+    
+    
+    
     _arSessionConfiguration = [ARWorldTrackingConfiguration new];
     _arSessionConfiguration.worldAlignment = ARWorldAlignmentGravity;
     _arSession = [ARSession new];
     
-    // _arCamera = [ARCamera new];s
-
+    
+    
+    NSLog(@"Starting to send this puppy to");
+    
+    ARFrame *frame = _arSession.currentFrame;
+    ARCamera *camera = frame.camera;
+    
+    
+    matrix_float4x4 transformMatrix = self.arSession.currentFrame.camera.transform;
+    
+    
+    float data[16];
+    
+    int count = 0;
+    for (int c = 0; c < 4; c++) {
+        simd_float4 col = transformMatrix.columns[c];
+        for (int r = 0; r < 4; r++) {
+            data[count] = col[r];
+            count++;
+        }
+    }
+    
+    matrix_float4x4 t = self.arSession.currentFrame.camera.transform;
+    for (int r = 0; r < 4; r++)
+      NSLog(@"%f %f %f %f \n", t.columns[0][r], t.columns[1][r], t.columns[2][r], t.columns[3][r]);
+    
+    
+    
+    
+    // _arCamera = [ARCamera new];ss
+    
     // Set the view's delegate
     self.sceneView.delegate = self;
-    
     // Show statistics such as fps and timing information
     self.sceneView.showsStatistics = YES;
     
-    // Create a new scene
+    // Create a new scesne
     SCNScene *scene = [SCNScene sceneNamed:@"art.scnassets/ship.scn"];
     
     // Set the scene to the view
@@ -46,7 +74,7 @@
     
     // Create a session configuration
     ARWorldTrackingConfiguration *configuration = [ARWorldTrackingConfiguration new];
-
+    
     // Run the view's session
     [self.sceneView.session runWithConfiguration:configuration];
 }
