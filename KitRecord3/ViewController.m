@@ -7,6 +7,8 @@
 //
 
 #import "ViewController.h"
+#import "Output.h"
+
 
 @interface ViewController () <ARSCNViewDelegate>
 
@@ -16,6 +18,7 @@
 
 
 @implementation ViewController
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -35,6 +38,8 @@
     
     
     matrix_float4x4 transformMatrix = self.arSession.currentFrame.camera.transform;
+    Output *output = [Output new];
+    [output outputMatrix];
     
     
     float data[16];
