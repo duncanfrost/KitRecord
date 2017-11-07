@@ -52,6 +52,22 @@
     for (int r = 0; r < 4; r++)
       NSLog(@"%f %f %f %f \n", t.columns[0][r], t.columns[1][r], t.columns[2][r], t.columns[3][r]);
     
+
+    float myFloat = 2.4312;
+    NSString *myString = [NSString stringWithFormat:@"%f", myFloat];
+
+
+    const char *saves = [myString UTF8String];
+    NSData *data2 = [[NSData alloc] initWithBytes:saves length:myString.length];
+    
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *appFile = [documentsDirectory stringByAppendingPathComponent:@"MyFile"];
+    [data2 writeToFile:appFile atomically:YES];
+    
+    NSLog(@"Documents Dir:%@",documentsDirectory);
+
     
     
     
