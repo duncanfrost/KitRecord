@@ -38,6 +38,7 @@
     
     
     matrix_float4x4 transformMatrix = self.arSession.currentFrame.camera.transform;
+    
     Output *output = [Output new];
     [output outputMatrix];
     
@@ -55,13 +56,13 @@
     
     matrix_float4x4 t = self.arSession.currentFrame.camera.transform;
     for (int r = 0; r < 4; r++)
-      NSLog(@"%f %f %f %f \n", t.columns[0][r], t.columns[1][r], t.columns[2][r], t.columns[3][r]);
+        NSLog(@"%f %f %f %f \n", t.columns[0][r], t.columns[1][r], t.columns[2][r], t.columns[3][r]);
     
-
+    
     float myFloat = 2.4312;
     NSString *myString = [NSString stringWithFormat:@"%f", myFloat];
-
-
+    
+    
     const char *saves = [myString UTF8String];
     NSData *data2 = [[NSData alloc] initWithBytes:saves length:myString.length];
     
@@ -72,11 +73,56 @@
     [data2 writeToFile:appFile atomically:YES];
     
     NSLog(@"Documents Dir:%@",documentsDirectory);
-
     
     
     
-    // _arCamera = [ARCamera new];ss
+    
+    
+    CVPixelBufferRef pixelBuffer = frame.capturedImage;
+    
+    //get raw pixel
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    GLubyte *rawImageBytes = CVPixelBufferGetBaseAddress(pixelBuffer);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer); //2560 == (640 * 4)
+    size_t bufferHeight = CVPixelBufferGetHeight(pixelBuffer);  //480
+    OSType pixelBufferType = CVPixelBufferGetPixelFormatType(pixelBuffer); //BGRA
+    size_t planeCount = CVPixelBufferGetPlaneCount(pixelBuffer);    //0
+    
+    for (size_t idx=0; idx<planeCount; idx++) {
+        size_t bytesPerRowOfPlane = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, idx);
+        NSLog(@"bytesPerRow: %l\n", bytesPerRowOfPlane);
+    }
+    size_t dataSize = CVPixelBufferGetDataSize(pixelBuffer); //1_228_808 = (2560 * 480) + 8
+    size_t bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
+    Boolean isPlanar = CVPixelBufferIsPlanar(pixelBuffer);
+    
+    unsigned char* buffer = (unsigned char*)malloc( dataSize );
+    //memcpy(buffer, rawImageBytes, dataSize);
+    for (int y=0; y<bufferHeight; y++) {
+        for (int x=0; x<bufferWidth; x++) {
+            buffer[y * bufferWidth * 4 + 4 * x + 0] = rawImageBytes[y * bufferWidth * 4 + 4 * x + 0];
+            buffer[y * bufferWidth * 4 + 4 * x + 1] = rawImageBytes[y * bufferWidth * 4 + 4 * x + 1];
+            buffer[y * bufferWidth * 4 + 4 * x + 2] = rawImageBytes[y * bufferWidth * 4 + 4 * x + 2];
+            buffer[y * bufferWidth * 4 + 4 * x + 3] = rawImageBytes[y * bufferWidth * 4 + 4 * x + 3];
+        }
+    }
+    
+    CGColorSpaceRef genericRGBColorspace = CGColorSpaceCreateDeviceRGB();
+    
+    CGContextRef context = CGBitmapContextCreate(buffer, bufferWidth, bufferHeight, 8, bytesPerRow, genericRGBColorspace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault);
+    
+    CGImageRef imageRef = CGBitmapContextCreateImage(context);
+    UIImage *image = [[UIImage alloc]initWithCGImage:imageRef];
+    NSData* imageData = UIImageJPEGRepresentation(image, 0.9f);
+    
+    
+    NSString* path =  [documentsDirectory stringByAppendingFormat:@"/image1.jpg"];
+    NSError *writeError = nil;
+    [imageData writeToFile:path options:NSDataWritingAtomic error:&writeError];
+    
+    
+    
+    // _arCamera = [ARCamera new];
     
     // Set the view's delegate
     self.sceneView.delegate = self;
@@ -115,15 +161,15 @@
 #pragma mark - ARSCNViewDelegate
 
 /*
-// Override to create and configure nodes for anchors added to the view's session.
-- (SCNNode *)renderer:(id<SCNSceneRenderer>)renderer nodeForAnchor:(ARAnchor *)anchor {
-    SCNNode *node = [SCNNode new];
+ // Override to create and configure nodes for anchors added to the view's session.
+ - (SCNNode *)renderer:(id<SCNSceneRenderer>)renderer nodeForAnchor:(ARAnchor *)anchor {
+ SCNNode *node = [SCNNode new];
  
-    // Add geometry to the node...
+ // Add geometry to the node...
  
-    return node;
-}
-*/
+ return node;
+ }
+ */
 
 - (void)session:(ARSession *)session didFailWithError:(NSError *)error {
     // Present an error message to the user
